@@ -13,7 +13,7 @@ from .api import RemnawaveAPI
 from .config import BACKUP_DIR
 from .ssh import SSHHost, run as ssh_run
 from .utils import CommandError, must_run, run_local
-from .versions import clean_version
+from .versions import clean_version, get_latest_versions, is_update_available
 
 
 @dataclass
@@ -22,6 +22,7 @@ class UpdateResult:
     name: str
     details: str = ""
     backup: str | None = None
+    skipped: bool = False
 
 
 @dataclass
@@ -252,6 +253,31 @@ def _wait_node_connected(api: RemnawaveAPI, uuid: str, timeout: int) -> bool:
     return False
 
 
+def _node_versions_before_update(api: RemnawaveAPI, node: dict, target: SSHHost) -> tuple[str | None, str | None]:
+    current: str | None = None
+    latest: str | None = None
+
+    try:
+        api_node = api.get_node(node["uuid"])
+        if api_node:
+            current = clean_version(api_node.node_version)
+    except Exception:
+        pass
+
+    if not current:
+        try:
+            current = clean_version(node_status_detail(target).version)
+        except Exception:
+            pass
+
+    try:
+        latest = clean_version(get_latest_versions().node)
+    except Exception:
+        pass
+
+    return current, latest
+
+
 def update_panel(api: RemnawaveAPI, timeout: int = 90, do_backup: bool = True, progress: Progress | None = None) -> UpdateResult:
     name = "Panel"
     backup = None
@@ -293,6 +319,18 @@ def update_node(
     target = SSHHost(node["host"], node.get("user", "root"), int(node.get("port", 22)))
     backup = None
     try:
+        current_version, latest_version = _node_versions_before_update(api, node, target)
+        update_state = is_update_available(current_version, latest_version)
+        if update_state is False:
+            current_text = f"v{current_version}" if current_version else "unknown"
+            latest_text = f"v{latest_version}" if latest_version else "unknown"
+            return UpdateResult(
+                True,
+                name,
+                f"up-to-date: {current_text} (latest {latest_text}) · skipped",
+                skipped=True,
+            )
+
         if do_backup:
             if progress:
                 progress("backup")
