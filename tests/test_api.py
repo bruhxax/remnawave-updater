@@ -8,7 +8,13 @@ class TestRemnawaveAPI(unittest.TestCase):
         payload = {
             "response": {
                 "nodes": [
-                    {"uuid": "1", "name": "DE", "address": "1.2.3.4", "isConnected": True},
+                    {
+                        "uuid": "1",
+                        "name": "DE",
+                        "address": "1.2.3.4",
+                        "isConnected": True,
+                        "versions": {"node": "3.4.1", "xray": "26.7.28"},
+                    },
                     {"uuid": "2", "name": "NL", "address": "node.example.com", "isConnected": False},
                 ]
             }
@@ -20,6 +26,8 @@ class TestRemnawaveAPI(unittest.TestCase):
         self.assertEqual(node.name, "DE")
         self.assertEqual(node.host, "1.2.3.4")
         self.assertIs(node.is_connected, True)
+        self.assertEqual(node.node_version, "3.4.1")
+        self.assertEqual(node.xray_version, "26.7.28")
 
     def test_base_url_adds_api_once(self):
         api = RemnawaveAPI("https://panel.example.com", "token")
