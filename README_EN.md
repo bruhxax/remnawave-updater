@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/banner.webp" alt="Remnawave Updater" width="100%">
+<img src="assets/banner.png" alt="Remnawave Updater" width="100%">
 
 # 🌊 Remnawave Updater
 
