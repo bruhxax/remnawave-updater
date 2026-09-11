@@ -1,7 +1,7 @@
 TEXT = {
     "ru": {
         "app_title": "Remnawave Updater",
-        "app_subtitle": "Безопасное обновление Panel, Nodes и Subscription Page",
+        "app_subtitle": "Безопасное обновление Panel, Nodes и Subscription Page  ·  by bruhxax",
         "language_title": "Выберите язык / Choose language",
         "lang_ru": "Русский",
         "lang_en": "English",
@@ -88,7 +88,7 @@ TEXT = {
     },
     "en": {
         "app_title": "Remnawave Updater",
-        "app_subtitle": "Safe updates for Panel, Nodes and Subscription Page",
+        "app_subtitle": "Safe updates for Panel, Nodes and Subscription Page  ·  by bruhxax",
         "language_title": "Choose language / Выберите язык",
         "lang_ru": "Русский",
         "lang_en": "English",
