@@ -18,6 +18,8 @@ class NodeInfo:
     name: str
     host: str
     is_connected: bool | None = None
+    node_version: str | None = None
+    xray_version: str | None = None
 
 
 class RemnawaveAPI:
@@ -35,7 +37,7 @@ class RemnawaveAPI:
             headers={
                 "Authorization": f"Bearer {self.token}",
                 "Accept": "application/json",
-                "User-Agent": "remnawave-updater/0.2",
+                "User-Agent": "remnawave-updater/0.3",
             },
         )
         context = None
@@ -54,6 +56,16 @@ class RemnawaveAPI:
     def health(self) -> bool:
         self._request("/system/health")
         return True
+
+    def get_panel_version(self) -> str | None:
+        payload = self._request("/system/metadata")
+        if isinstance(payload, dict):
+            response = payload.get("response")
+            if isinstance(response, dict) and response.get("version"):
+                return str(response["version"])
+            if payload.get("version"):
+                return str(payload["version"])
+        return None
 
     @staticmethod
     def _pick(obj: dict[str, Any], keys: tuple[str, ...], default=None):
@@ -97,10 +109,23 @@ class RemnawaveAPI:
         host = cls._pick(obj, ("address", "host", "ip", "nodeAddress"))
         if not uuid or not host:
             return None
+
         connected = cls._pick(obj, ("isConnected", "is_connected", "connected"), None)
         if isinstance(connected, str):
             connected = connected.lower() in {"true", "1", "yes", "online"}
-        return NodeInfo(str(uuid), str(name), str(host), connected if isinstance(connected, bool) else None)
+
+        versions = obj.get("versions") if isinstance(obj.get("versions"), dict) else {}
+        node_version = cls._pick(versions, ("node", "nodeVersion", "version"), None)
+        xray_version = cls._pick(versions, ("xray", "xrayVersion"), None)
+
+        return NodeInfo(
+            str(uuid),
+            str(name),
+            str(host),
+            connected if isinstance(connected, bool) else None,
+            str(node_version) if node_version else None,
+            str(xray_version) if xray_version else None,
+        )
 
     def get_nodes(self) -> list[NodeInfo]:
         payload = self._request("/nodes")
@@ -109,7 +134,6 @@ class RemnawaveAPI:
             node = self._to_node(obj)
             if node:
                 nodes.append(node)
-        # Keep first occurrence by UUID
         unique: dict[str, NodeInfo] = {}
         for node in nodes:
             unique.setdefault(node.uuid, node)
@@ -126,7 +150,6 @@ class RemnawaveAPI:
             node = self._to_node(obj)
             if node:
                 return node
-        # Some single-object responses are nested under response/data.
         stack = [payload]
         while stack:
             value = stack.pop()
