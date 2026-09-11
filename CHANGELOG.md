@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.1 — 2026-09-11
+
+- Added the short global `updater` command; it can be launched from any directory.
+- Installer now detects an existing `/etc/remnawave-updater/config.json` and keeps the saved Panel URL/API token instead of running the setup wizard again.
+- Reinstall/update keeps Panel URL, API token, node SSH settings and generated SSH keys.
+- Uninstall still keeps `/etc/remnawave-updater` intentionally, including Panel credentials and SSH configuration.
+
 ## 0.3.0 — 2026-09-11
 
 - Redesigned the terminal interface with a consistent blue theme, cards and bordered menus.
