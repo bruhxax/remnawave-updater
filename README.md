@@ -2,36 +2,49 @@
 
 # 🌊 Remnawave Updater
 
-**Удобный CLI для обновления Remnawave Panel, Nodes и Subscription Page.**
+**Удобный CLI-менеджер для обновления Remnawave Panel, Nodes и Subscription Page.**
 
-[![Language RU](https://img.shields.io/badge/README-Русский-blue)](README.md)
-[![Language EN](https://img.shields.io/badge/README-English-lightgrey)](README_EN.md)
-[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB)](https://www.python.org/)
+[![Русский](https://img.shields.io/badge/README-Русский-3776AB?style=for-the-badge)](README.md)
+[![English](https://img.shields.io/badge/README-English-555555?style=for-the-badge)](README_EN.md)
+
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-Без Web UI · Русский / English · SSH-ключи · Последовательное обновление нод
+**Без Web UI · Русский / English · SSH-ключи · Последовательное обновление нод**
 
 </div>
 
-> Проект не является официальным компонентом Remnawave. Перед обновлением major-версий всегда проверяйте официальный changelog.
+> [!WARNING]
+> Проект не является официальным компонентом Remnawave.  
+> Перед major-обновлениями всегда проверяйте официальный changelog Remnawave.
 
-## ✨ Что умеет
+---
 
-- обновлять **Remnawave Panel**;
-- получать список нод напрямую из **Remnawave API**;
-- обновлять **все ноды** или только выбранные;
-- обновлять ноды **строго по очереди**, а не одновременно;
-- проверять контейнер и подключение ноды после обновления;
-- обновлять **Subscription Page** локально или на отдельном VPS;
-- создавать backup перед обновлением;
-- не хранить пароли от VPS;
-- работать на русском и английском языках;
-- пропускать любые ноды при первоначальной настройке и добавить их позже.
+## ✨ Возможности
 
-## 🖥️ Как выглядит логика
+- обновление **Remnawave Panel**;
+- автоматическое получение списка нод через **Remnawave API**;
+- обновление **всех** или только выбранных нод;
+- последовательное обновление нод — по одной;
+- health check после обновления каждой ноды;
+- обновление **Subscription Page**;
+- поддержка Sub Page на сервере Panel или отдельном VPS;
+- backup конфигурации перед обновлением;
+- SSH-доступ по отдельному Ed25519-ключу;
+- пароли VPS **не сохраняются**;
+- русский и английский интерфейс;
+- возможность пропустить ненужные ноды;
+- синхронизация новых нод после первоначальной настройки;
+- диагностика Panel, API, Docker и SSH.
+
+---
+
+## 🖥️ Главное меню
 
 ```text
-Remnawave Updater
+╭──────────────────────────────╮
+│      Remnawave Updater       │
+╰──────────────────────────────╯
 
 1. Обновить Panel
 2. Обновить Nodes
@@ -41,7 +54,7 @@ Remnawave Updater
 6. Выход
 ```
 
-В меню нод:
+Меню Nodes:
 
 ```text
 1. Обновить все настроенные ноды
@@ -49,17 +62,99 @@ Remnawave Updater
 3. Назад
 ```
 
-При первом запуске программа получает ноды из Panel API и спрашивает для каждой:
+---
+
+## 🚀 Установка
+
+### Требования
+
+- Ubuntu / Debian;
+- Remnawave Panel;
+- Docker + Docker Compose Plugin;
+- `root` или `sudo`;
+- API Token Remnawave;
+- SSH-доступ к VPS с нодами.
+
+### Скачать проект
+
+```bash
+git clone https://github.com/bruhxax/remnawave-updater.git
+cd remnawave-updater
+```
+
+### Установить
+
+```bash
+sudo ./install.sh
+```
+
+После установки автоматически запустится первоначальная настройка.
+
+Если мастер настройки пока запускать не нужно:
+
+```bash
+sudo ./install.sh --no-setup
+```
+
+Позже его можно запустить вручную:
+
+```bash
+sudo remnawave-updater setup
+```
+
+---
+
+## ⚙️ Первоначальная настройка
+
+При первом запуске:
+
+1. Выберите язык:
+   - 🇷🇺 Русский
+   - 🇬🇧 English
+
+2. Введите URL Remnawave Panel.
+
+3. Вставьте API Token.
+
+4. Updater проверит подключение к API.
+
+5. Список нод будет получен автоматически.
+
+6. Для каждой ноды появится запрос:
 
 ```text
 Настроить SSH для ноды «Germany» (185.10.10.10)? [Y/n]
 ```
 
-Нажмите `n`, чтобы **пропустить ноду**. Она не попадёт в список обновления. Позже её можно добавить через `Настройки → Синхронизировать ноды`.
+Нажмите:
 
-## 🔐 Как работает SSH
+```text
+Enter / Y
+```
 
-При первом подключении к VPS программа спрашивает:
+чтобы добавить ноду.
+
+Или:
+
+```text
+n
+```
+
+чтобы **пропустить её**.
+
+Пропущенная нода не будет участвовать в обновлениях.
+
+Позже её можно добавить командой:
+
+```bash
+sudo remnawave-updater sync-nodes
+```
+
+---
+
+## 🔐 SSH
+
+Для каждой добавляемой ноды Updater попросит:
 
 ```text
 SSH username [root]:
@@ -67,11 +162,267 @@ SSH port [22]:
 SSH password:
 ```
 
-Пароль используется **только один раз**. Updater создаёт отдельный Ed25519 SSH-ключ и добавляет его в `authorized_keys` на сервере.
+Если используется стандартный пользователь `root`, просто нажмите:
 
-После этого обновления выполняются по ключу. **Пароли VPS на диск не записываются.** SSH host key после первого подключения закрепляется в отдельном `known_hosts`.
+```text
+Enter
+```
 
-Файлы:
+То же самое для стандартного SSH-порта `22`.
+
+### Пароль не сохраняется
+
+SSH-пароль используется только при первоначальной настройке.
+
+Updater создаёт отдельный:
+
+```text
+Ed25519 SSH key
+```
+
+и добавляет его public key в:
+
+```text
+~/.ssh/authorized_keys
+```
+
+После этого подключения выполняются по ключу.
+
+Пароли VPS на диск **не записываются**.
+
+---
+
+## 🔄 Обновление нод
+
+Ноды обновляются **строго по очереди**, а не одновременно:
+
+```text
+Germany
+   ↓
+Backup
+   ↓
+docker compose pull
+   ↓
+Restart
+   ↓
+Health check
+   ↓
+✓ OK
+
+Netherlands
+   ↓
+...
+```
+
+Если health check не проходит, дальнейшее массовое обновление останавливается.
+
+Это снижает вероятность одновременного падения всех VPN-нод.
+
+---
+
+## 🌐 Subscription Page
+
+Во время первоначальной настройки можно выбрать:
+
+```text
+1. Subscription Page находится на сервере Panel
+2. Subscription Page находится на другом VPS
+3. Subscription Page не используется
+```
+
+Если Sub Page расположен на другом сервере, SSH настраивается так же, как для Nodes.
+
+---
+
+## 💾 Backup
+
+Перед обновлениями сохраняются важные файлы конфигурации.
+
+### Panel
+
+Backup хранится в:
+
+```text
+/var/backups/remnawave-updater/
+```
+
+Могут сохраняться:
+
+```text
+.env
+docker-compose.yml
+PostgreSQL dump
+```
+
+### Nodes / Subscription Page
+
+Backup конфигурации создаётся непосредственно на соответствующем VPS:
+
+```text
+/var/backups/remnawave-updater/
+```
+
+> [!NOTE]
+> Автоматический rollback базы данных специально не выполняется.  
+> Миграции между версиями могут отличаться, поэтому восстановление БД безопаснее выполнять вручную после проверки конкретного релиза.
+
+---
+
+## 🛠️ Полезные команды
+
+| Команда | Назначение |
+|---|---|
+| `sudo remnawave-updater` | открыть главное меню |
+| `sudo remnawave-updater setup` | запустить настройку заново |
+| `sudo remnawave-updater status` | проверить компоненты |
+| `sudo remnawave-updater doctor` | диагностика Docker, API, SSH и конфигурации |
+| `sudo remnawave-updater sync-nodes` | найти и добавить новые ноды |
+| `remnawave-updater --version` | показать версию |
+
+---
+
+## 🩺 Диагностика
+
+Перед первым обновлением рекомендуется выполнить:
+
+```bash
+sudo remnawave-updater doctor
+```
+
+Updater проверит:
+
+- конфигурацию;
+- Remnawave API;
+- Docker;
+- Panel;
+- SSH-доступ;
+- настроенные Nodes;
+- Subscription Page.
+
+---
+
+## 🔃 Обновление Remnawave Updater
+
+Перейдите в каталог проекта:
+
+```bash
+cd remnawave-updater
+```
+
+Получите последнюю версию:
+
+```bash
+git pull
+```
+
+И переустановите CLI:
+
+```bash
+sudo ./install.sh --no-setup
+```
+
+Ваш конфиг, API Token и SSH-ключи сохранятся.
+
+---
+
+## 🗑️ Удаление
+
+```bash
+sudo ./uninstall.sh
+```
+
+После удаления данные:
+
+```text
+/etc/remnawave-updater/
+/var/backups/remnawave-updater/
+```
+
+автоматически не удаляются.
+
+Это сделано специально, чтобы случайно не потерять конфигурацию, SSH-ключи и backups.
+
+---
+
+## 📁 Стандартные пути
+
+Updater рассчитан на стандартную структуру Remnawave:
+
+```text
+Panel:
+ /opt/remnawave
+
+Node:
+ /opt/remnanode
+
+Subscription Page:
+ /opt/remnawave/subscription
+```
+
+Если компоненты установлены в нестандартные каталоги, текущая версия Updater может работать некорректно.
+
+---
+
+## ⚠️ Major-обновления
+
+Remnawave Updater **не изменяет `docker-compose.yml` автоматически при major-миграциях**.
+
+Некоторые крупные обновления могут требовать:
+
+- изменения Docker image tag;
+- изменения `.env`;
+- изменения `docker-compose.yml`;
+- дополнительных migration-шагов.
+
+Перед major-обновлением обязательно проверьте:
+
+**Remnawave Upgrade Guide:**  
+https://docs.rw/install/upgrading/
+
+**Remnawave Documentation:**  
+https://docs.rw/
+
+---
+
+## 📜 Логи Remnawave
+
+### Panel
+
+```bash
+cd /opt/remnawave
+docker compose logs -f -t
+```
+
+### Node
+
+```bash
+docker logs -f remnanode
+```
+
+### Xray
+
+```bash
+docker exec remnanode xlogs
+```
+
+---
+
+## 🔒 Безопасность
+
+Подробнее:
+
+[SECURITY.md](SECURITY.md)
+
+Основные принципы:
+
+- VPS-пароли не сохраняются;
+- API Token хранится с root-only правами;
+- используется отдельный SSH Ed25519 key;
+- SSH host keys сохраняются в отдельный `known_hosts`;
+- приватный SSH-ключ доступен только root;
+- major-конфигурация Remnawave не изменяется автоматически.
+
+Файлы Updater:
 
 ```text
 /etc/remnawave-updater/config.json
@@ -79,193 +430,35 @@ SSH password:
 /etc/remnawave-updater/known_hosts
 ```
 
-Конфигурация и приватный ключ доступны только root.
+---
 
-## 📦 Установка
+## 🤝 Contribution
 
-### Требования
+Pull Requests и предложения приветствуются.
 
-- Ubuntu / Debian;
-- установленный Remnawave Panel;
-- Docker + Docker Compose plugin;
-- root / sudo;
-- API token Remnawave Panel;
-- SSH-доступ к VPS с нодами.
+Если нашли баг или хотите предложить функцию:
 
-### 1. Скачайте проект
+**GitHub Issues:**  
+https://github.com/bruhxax/remnawave-updater/issues
 
-После загрузки этого репозитория на свой GitHub:
-
-```bash
-git clone https://github.com/YOUR_GITHUB_USERNAME/remnawave-updater.git
-cd remnawave-updater
-```
-
-Или просто распакуйте скачанный ZIP и перейдите в каталог проекта.
-
-### 2. Запустите установку
-
-```bash
-sudo ./install.sh
-```
-
-Installer установит системные Python-зависимости и сразу откроет мастер настройки.
-
-Если мастер пока запускать не нужно:
-
-```bash
-sudo ./install.sh --no-setup
-```
-
-Затем:
-
-```bash
-sudo remnawave-updater setup
-```
-
-## ⚙️ Первоначальная настройка
-
-1. Выберите `Русский` или `English`.
-2. Введите URL Remnawave Panel.
-3. Вставьте API token.
-4. Updater проверит API и автоматически получит список нод.
-5. Для каждой нужной ноды подтвердите настройку SSH.
-6. Ненужные ноды можно пропустить через `n`.
-7. Выберите, где установлена Subscription Page:
-   - на сервере Panel;
-   - на другом VPS;
-   - не используется.
-
-После этого достаточно запускать:
-
-```bash
-sudo remnawave-updater
-```
-
-## 🔄 Как проходит обновление
-
-Updater придерживается рекомендуемого Remnawave порядка: сначала **Panel**, затем **Nodes**. Для каждого компонента используется официальный подход `docker compose pull` → перезапуск compose → health check.
-
-Для нод обновление выполняется последовательно:
-
-```text
-Node 1 → pull → restart → health check → Panel API check
-                         ↓
-Node 2 → pull → restart → health check → Panel API check
-                         ↓
-Node 3 → ...
-```
-
-Если нода не обновилась, по умолчанию дальнейшая очередь останавливается, чтобы одна проблема не затронула остальные серверы.
-
-### ⚠️ Major-обновления
-
-Updater **не переписывает `docker-compose.yml` автоматически**. Это специально сделано для безопасности.
-
-Некоторые major-релизы Remnawave требуют ручных изменений compose/config. Например, при переходе между major-тегами может понадобиться изменить Docker image tag. Перед такими обновлениями проверьте официальный changelog:
-
-- https://docs.rw/install/upgrading/
-- https://f.docs.rw/
-
-## 💾 Backups
-
-Перед обновлением Panel сохраняются:
-
-- `.env`;
-- `docker-compose.yml`;
-- PostgreSQL dump, если его удалось создать.
-
-Локальные backups:
-
-```text
-/var/backups/remnawave-updater/
-```
-
-Для удалённых Nodes / Subscription Page backup конфигурации создаётся на соответствующем VPS:
-
-```text
-/var/backups/remnawave-updater/
-```
-
-> Backup создаётся как страховка. Автоматическое восстановление базы не выполняется: откат миграций БД без проверки конкретного релиза может быть опаснее самого сбоя.
-
-## 🛠️ Полезные команды
-
-| Команда | Что делает |
-|---|---|
-| `sudo remnawave-updater` | открыть главное меню |
-| `sudo remnawave-updater setup` | заново запустить мастер настройки |
-| `sudo remnawave-updater status` | проверить Panel, Nodes и Sub Page |
-| `sudo remnawave-updater sync-nodes` | найти новые ноды и предложить добавить их |
-| `sudo remnawave-updater doctor` | проверить Docker, API, SSH и конфигурацию |
-| `remnawave-updater --version` | показать версию |
-
-### Обновить сам Remnawave Updater
-
-Из каталога репозитория:
-
-```bash
-git pull
-sudo ./install.sh --no-setup
-```
-
-Настройки, API token и SSH-ключ при переустановке сохраняются.
-
-### Удаление
-
-```bash
-sudo ./uninstall.sh
-```
-
-Приложение удалится, но `/etc/remnawave-updater` и backups останутся на сервере специально, чтобы случайно не удалить ключи и резервные копии.
-
-## 📁 Стандартные пути Remnawave
-
-Updater рассчитан на официальную структуру установки:
-
-```text
-Panel:             /opt/remnawave
-Node:              /opt/remnanode
-Subscription Page: /opt/remnawave/subscription
-```
-
-Если Remnawave установлен сторонним installer-скриптом в другие каталоги, текущая версия Updater может не подойти.
-
-## 🩺 Если что-то не работает
-
-Сначала выполните:
-
-```bash
-sudo remnawave-updater doctor
-```
-
-Также полезны официальные команды Remnawave:
-
-```bash
-# Panel logs
-cd /opt/remnawave && docker compose logs -f -t
-
-# Node logs
-docker logs -f remnanode
-
-# Xray logs
-docker exec remnanode xlogs
-```
-
-Официальная документация: https://docs.rw/
-
-## 🔒 Безопасность
-
-Подробнее: [SECURITY.md](SECURITY.md).
-
-Коротко:
-
-- VPS passwords не сохраняются;
-- API token хранится root-only (`600`);
-- используется отдельный SSH Ed25519 key;
-- SSH host keys закрепляются после первого подключения;
-- updater не пытается автоматически менять major-конфигурацию Remnawave.
+---
 
 ## 📄 License
 
-MIT — см. [LICENSE](LICENSE).
+Проект распространяется под лицензией **MIT**.
+
+Подробнее:
+
+[LICENSE](LICENSE)
+
+---
+
+<div align="center">
+
+### 🌊 Remnawave Updater
+
+Simple. Safe. CLI.
+
+[🇷🇺 Русский](README.md) · [🇬🇧 English](README_EN.md)
+
+</div>
