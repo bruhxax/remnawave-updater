@@ -3,6 +3,8 @@ set -Eeuo pipefail
 
 APP_DIR="/opt/remnawave-updater"
 BIN="/usr/local/bin/remnawave-updater"
+SHORT_BIN="/usr/local/bin/updater"
+CONFIG_FILE="/etc/remnawave-updater/config.json"
 SOURCE_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 RUN_SETUP=1
 
@@ -75,16 +77,47 @@ export PYTHONPATH="$APP_DIR\${PYTHONPATH:+:\$PYTHONPATH}"
 exec "$PYTHON_BIN" -m remnawave_updater.cli "\$@"
 WRAPPER
 chmod 755 "$BIN"
+ln -sfn "$BIN" "$SHORT_BIN"
 
 echo "[3/3] Done."
 echo "  ✓ No apt update"
 echo "  ✓ No pip install"
 echo "  ✓ No third-party Python packages"
+echo "  ✓ Command installed: updater"
 echo
 
+has_saved_panel_config() {
+  [[ -f "$CONFIG_FILE" ]] || return 1
+  "$PYTHON_BIN" - "$CONFIG_FILE" <<'PY' >/dev/null 2>&1
+import json
+import sys
+from pathlib import Path
+
+try:
+    data = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+    panel = data.get("panel", {})
+    ok = bool(str(panel.get("url", "")).strip() and str(panel.get("token", "")).strip())
+except Exception:
+    ok = False
+raise SystemExit(0 if ok else 1)
+PY
+}
+
 if [[ $RUN_SETUP -eq 1 ]]; then
-  "$BIN" setup
-  exec "$BIN"
+  if has_saved_panel_config; then
+    echo "  ✓ Saved Panel URL and API token found"
+    echo "  ✓ Existing settings were kept"
+    echo
+    exec "$SHORT_BIN"
+  fi
+
+  "$SHORT_BIN" setup
+  exec "$SHORT_BIN"
 else
-  echo "Run setup: sudo remnawave-updater setup"
+  if has_saved_panel_config; then
+    echo "Saved Panel URL/API token kept in $CONFIG_FILE"
+    echo "Run: sudo updater"
+  else
+    echo "Run setup: sudo updater setup"
+  fi
 fi
