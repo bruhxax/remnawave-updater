@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.0 — 2026-09-11
+
+- Redesigned the terminal interface with a consistent blue theme, cards and bordered menus.
+- The screen is cleared before the main menu and major interactive sections.
+- Added animated spinners for API checks, SSH checks, status checks and every update stage.
+- Added a main dashboard with Panel, Nodes and Subscription Page state/version information.
+- Added live latest-version checks against the official Remnawave GitHub repositories.
+- Panel installed version is read from `/api/system/metadata`.
+- Node installed versions are read directly from Remnawave Panel API node metadata.
+- Subscription Page version is detected from the running container/startup logs when the Docker tag is not a fixed SemVer tag.
+- Status view now shows Installed / Latest / Update state for every configured component.
+- Update progress now animates backup, Docker pull, restart and health-check stages.
+- Added version parsing/comparison tests.
+
 ## 0.2.0 — 2026-09-11
 
 - Removed `rich` and `paramiko` runtime dependencies.
