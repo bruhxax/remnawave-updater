@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.2 — 2026-09-11
+
+- Nodes that already run the latest Remnawave Node version are now skipped before backup, Docker pull and restart.
+- Node version pre-check first uses Remnawave Panel API and falls back to the remote container when needed.
+- If latest-version lookup is unavailable, Updater keeps the safe old behavior and performs the update instead of incorrectly skipping it.
+- Confirmation input is more tolerant of RU/EN keyboard layouts and no longer repeats the same question after an invalid key.
+
 ## 0.3.1 — 2026-09-11
 
 - Added the short global `updater` command; it can be launched from any directory.
