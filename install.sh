@@ -83,7 +83,8 @@ echo "  ✓ No third-party Python packages"
 echo
 
 if [[ $RUN_SETUP -eq 1 ]]; then
-  exec "$BIN" setup
+  "$BIN" setup
+  exec "$BIN"
 else
   echo "Run setup: sudo remnawave-updater setup"
 fi
