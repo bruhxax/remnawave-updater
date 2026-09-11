@@ -41,7 +41,7 @@ def primary(text: str) -> str:
     return color(text, PRIMARY)
 
 
-def cyan(text: str) -> str:  # Backward-compatible alias.
+def cyan(text: str) -> str:
     return primary(text)
 
 
@@ -156,21 +156,25 @@ def prompt(text: str, default: str | None = None, secret: bool = False) -> str:
 
 def confirm(text: str, default: bool = True) -> bool:
     suffix = " [Y/n]" if default else " [y/N]"
-    yes = {"y", "yes", "д", "да"}
-    no = {"n", "no", "н", "нет"}
-    while True:
-        try:
-            value = input(f"{primary('›')} {text}{suffix}: ").strip().lower()
-        except (EOFError, KeyboardInterrupt):
-            print()
-            raise SystemExit(130)
-        if not value:
-            return default
-        if value in yes:
-            return True
-        if value in no:
-            return False
-        print(dim("  Y / N"))
+    yes = {"y", "yes", "д", "да", "у", "1", "+"}
+    no = {"n", "no", "н", "нет", "т", "0", "-"}
+    try:
+        value = input(f"{primary('›')} {text}{suffix}: ").strip().lower()
+    except (EOFError, KeyboardInterrupt):
+        print()
+        raise SystemExit(130)
+
+    if not value:
+        return default
+    if value in yes or value.startswith("yes") or value.startswith("да"):
+        return True
+    if value in no or value.startswith("no") or value.startswith("нет"):
+        return False
+
+    # Do not ask the same confirmation repeatedly because of a keyboard-layout typo.
+    # Fall back to the displayed default and show what happened.
+    print(dim("  Некорректный ответ — используется значение по умолчанию."))
+    return default
 
 
 def choose(text: str, choices: Iterable[str], default: str | None = None) -> str:
