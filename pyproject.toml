@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "remnawave-updater"
+version = "0.1.0"
+description = "Bilingual CLI update manager for Remnawave Panel, Nodes and Subscription Page"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Remnawave Updater contributors"}]
+dependencies = [
+  "rich>=13.7,<15",
+  "paramiko>=3.4,<5",
+]
+keywords = ["remnawave", "vpn", "docker", "updater", "cli"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: POSIX :: Linux",
+]
+
+[project.scripts]
+remnawave-updater = "remnawave_updater.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["remnawave_updater*"]
