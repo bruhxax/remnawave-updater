@@ -35,7 +35,7 @@ class RemnawaveAPI:
             headers={
                 "Authorization": f"Bearer {self.token}",
                 "Accept": "application/json",
-                "User-Agent": "remnawave-updater/0.1",
+                "User-Agent": "remnawave-updater/0.2",
             },
         )
         context = None
